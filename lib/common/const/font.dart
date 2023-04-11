@@ -1,0 +1,3 @@
+const DEFUALT_FONT_SIZE = 17.0;
+const LARGE_FONT_SIZE = 19.0;
+const DIALOG_FONT_SIZE = 22.0;

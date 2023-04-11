@@ -1,0 +1,22 @@
+import 'package:boardca/common/utils/member_sheets.dart';
+import 'package:gsheets/gsheets.dart';
+
+class GSheetsconfig {
+  static const _credentials = r'''
+{
+  "type": "service_account",
+  "project_id": "boardca",
+  "private_key_id": "f2b61a8c938cc827be9463d3f32c7408e003f656",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDSsG4ox8TSdfGy\n081JQjN/o8+lpQrne9hM33uYnXOd7urHfef8Rkx93mz4nnBP56Jyo+V7TVKI81el\nFHjyD9HyQpQV7/YmFrlHdNknU8TCQiUh4VvtLYGKVdMwQ5MTjeBS+c9utk6eSBI4\nNa/SzbRvQiq1RcrZ2Gem2QUoBwlmwsXIqu74AYRcn5tkJVjevYuGM8Xc/9QQPyoW\n3mJP42TiNkkn4FroTOT0Gpo7DfcwXra0vOVC6+45h6Fbd1Y1VZBMr68yWzzajZ53\nXTkWZpyVfzqH1nz6EbwpdXILzvvy/YuIzX+9BIF86osY2Kxkt+jux1utDHTLatP6\nYNSihwllAgMBAAECggEACNhBw6IBTAGKDEMSfOcT0OGwW6iWUNn03mNKZcGEY0au\nogHR3ZgY6XbPNc+28M/NVMk3HspD8v5eOU6m9ih+XJB5dYNNntM443xPCnTcj3gl\n5Wp3yLjulX9dXosTr1A3MNyOXfw2yDPH2ga88xlSIBKTxujfZ25LiahWLFRBS4hB\nqRO7KfT7VPoUYTaTVYPhBCvFCQ/cIyCToH/10QR1MCEW0I5wFhJk+ybA3NjtH438\nMa+lMCE3WP6iUxxgWvNG2+KR/dyPsqlmOmBPtcvS1fq/Cs1j7qNehMmpILxQBkq+\nWyfnDmDvnz9MN/oP2lcs/vRr9tNmKlMA7dMuGoMB4QKBgQD4HkdTenWacWqvSIX8\nd7thXalb+4MyB0rbsiFUOYoLqZTGsxJXb/Je/Uz8h7claAfKdUJabowwNYrZy0iv\n3OUORE4C3CfAdzoOZfGX8TuDQ4oDL3TGgFAylQrGsbpIS+VAPqn1dvAi7CD6r1dB\nqVdCwjdeo2ou7fuOxmFqEgnYhQKBgQDZYcZVMqzlVwj4XPJhEdNtlzf6AWmKGXNX\nJ/4u0bkxV39L0ryxeFr7zk4jWwJVhJcOhTvK8BCbQ/u57puc5NZp9vEGq4WSjzCW\nNPYZ3aJUE04lODFx/TqaMpUnZTSpu7oLm3ByxqxpJ/PJwEVA6mkzmIefIOikSd35\ngDHDIPuzYQKBgF7iBVixDeQf1zJsw4BGsUuMq8VXK1aoX0Ignoo87sOC+Df8Jtl1\nH/SfXR99LtaJL+GGcfdvKwEMmKqtCIDoMlgAWuzREAqUDYmQBpGaWK3b2B1buoZm\nb0TIpjRRpvEaxPKKhCgwcaiJMBttjiq3/Xy0FMSGLYcAzyBMUNhlSYqZAoGAQSr1\nqU7y1CIed05t/zm314/Q4SsRN6xfjo5XvjNzQF6Js/JuTQnWxMxZUnITJg4Etv6s\nKS+E2vcrfNcSYZucx9GW+jfraD9zAmTILoLqCihrce8Bq7mNmvJ1EoVdn1C++oHT\n2STERRYMGLyCRm6/sQ8WAVd9Rts6J3UN9gBqVKECgYAuDMxH/eOXHtW9p2z5z/oh\nIz0dH0GzuQfK5n8CJMlExsKKqbINZBAa53Pw07nByCKYHD158ccoeMh3xKEbqWh2\nHIsYWvVJu1QgXA5CS1vi19a7NmJp1y0Og9RrqOdZJUaLEEYVpGGz2yDOfQHDf45c\nf4k8nqK82Q1T5qK2vd8l2w==\n-----END PRIVATE KEY-----\n",
+  "client_email": "boardcagsheets@boardca.iam.gserviceaccount.com",
+  "client_id": "104572665933896515799",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/boardcagsheets%40boardca.iam.gserviceaccount.com"
+}
+
+    ''';
+  static const spreadSheetId = "1hSTk10oZnrKVi3q7XWN5DaJuSujJKqHk-flcMTb1Sh4";
+  static final gSheets = GSheets(_credentials);
+}
