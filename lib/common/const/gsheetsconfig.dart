@@ -1,4 +1,3 @@
-import 'package:boardca/common/utils/member_sheets.dart';
 import 'package:gsheets/gsheets.dart';
 
 class GSheetsconfig {

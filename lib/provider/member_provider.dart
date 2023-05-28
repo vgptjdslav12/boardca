@@ -13,9 +13,9 @@ class MemberNotifier extends StateNotifier<MemberModel> {
     getMember(1, mSheets);
   }
 
-  void update(MemberModel model) {
+  void update(MemberModel model, MemberSheets sheets, int index, int num) {
     state = model;
-    for (int i = 0; i < 10; i++) print(state.list[i].ticket);
+    sheets.updateSheets(model, index, num);
   }
 
   Future<void> getMember(int num, MemberSheets sheets) async {
@@ -25,6 +25,7 @@ class MemberNotifier extends StateNotifier<MemberModel> {
       print(state);
     } catch (e) {
       print(e);
+      return;
     }
   }
 }

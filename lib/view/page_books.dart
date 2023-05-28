@@ -2,20 +2,43 @@ import 'package:boardca/common/const/font.dart';
 import 'package:flutter/material.dart';
 import 'package:boardca/layout/default_layout.dart';
 import 'package:boardca/layout/menu_drawer.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../common/const/colors.dart';
+import '../common/const/const.dart';
+import '../common/utils/books_sheets.dart';
+import '../model/books_model.dart';
+import '../provider/books_provider.dart';
 
-class BooksPage extends StatefulWidget {
+class BooksPage extends ConsumerStatefulWidget {
   const BooksPage({Key? key}) : super(key: key);
 
   @override
   _BooksPageState createState() => _BooksPageState();
 }
 
-class _BooksPageState extends State<BooksPage> {
+class _BooksPageState extends ConsumerState<BooksPage> {
   final String title = '장부 관리';
+  var num = 1;
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    print(bSheets.amount);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    bSheets.initalWorksheet().then((value) {
+      ref.read(booksProvider.notifier).getBooks(1, bSheets);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    var booksList = ref.watch(booksProvider) as BooksModel;
     return DefaultLayout(
       title: title,
       drawer: menu_drawer(),
@@ -66,23 +89,40 @@ class _BooksPageState extends State<BooksPage> {
               ),
             ),
             //tile은 반드시 10개씩 생성
-            tile("문국원 4 회권", "40,000", "2023-06-21"),
-            tile("허수영 3 달 갱신", "96,000", "2023-04-11"),
-            tile("박성현 4 회권", "40,000", "2023-04-11"),
-            tile("주진수 3 달 갱신", "96,000", "2023-03-25"),
-            tile("아지트 월세", "-350,000", "2023-03-15"),
-            tile("아이스티 구매", "-12,000", "3050-12-31"),
-            tile("핫초코 구매", "-15,000", "9999-12-31"),
-            tile("간식비", "-25,000", "2023-03-16"),
-            tile("윤종현 3 달 갱신", "96,000", "2021-04-08"),
-            tile("황승준 3 달 갱신", "96,000", "2021-06-23"),
-            tile("지니어스 우승상품", "-128,000", "2021-06-23"),
-            tile("지니어스 준 우승상품", "-40,000", "2021-06-23"),
-            const Text(
-              "1  2  3  4  >>",
-              style: TextStyle(
-                  fontSize: DEFUALT_FONT_SIZE, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+            if (booksList.list.isNotEmpty) ...[
+              for (var i in booksList.list) ...[
+                Expanded(
+                  flex: 1,
+                  child: tile(i),
+                )
+              ],
+              for (var i = booksList.list.length; i < 10; i++) ...[
+                const Expanded(flex: 1, child: SizedBox()),
+              ],
+            ] else ...[
+              const CircularProgressIndicator(),
+              const Text('로딩중입니다...'),
+            ],
+            Row(
+              children: [
+                for (var i = 1; i < bSheets.amount! / 10 + 1; i++) ...[
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        num = i;
+                        ref.read(booksProvider.notifier).getBooks(i, bSheets);
+                      });
+                    },
+                    child: Text(
+                      i.toString(),
+                      style: const TextStyle(
+                          fontSize: DEFUALT_FONT_SIZE,
+                          fontWeight: FontWeight.bold,
+                          color: TEXT_COLOR),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
@@ -90,12 +130,17 @@ class _BooksPageState extends State<BooksPage> {
     );
   }
 
-  ListTile tile(String history, String money, String date) {
+  ListTile tile(BooksInnerModel model) {
+    var history = model.history;
+    var cost =
+        formatCurrency.format(int.parse(model.cost)).toString().substring(1);
+    var date = model.date;
     return ListTile(
       onTap: () => {
         showDialog(
             context: context,
-            builder: (BuildContext context) => cogDialog(history, money, date))
+            builder: (BuildContext context) =>
+                cogDialog(history, cost, date, model.index))
       },
       contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       visualDensity: const VisualDensity(horizontal: 0, vertical: -3),
@@ -116,7 +161,7 @@ class _BooksPageState extends State<BooksPage> {
               child: FittedBox(
                 alignment: Alignment.centerRight,
                 fit: BoxFit.scaleDown,
-                child: Text("$money 원",
+                child: Text("$cost 원",
                     style: const TextStyle(
                         fontSize: DEFUALT_FONT_SIZE + 1,
                         fontWeight: FontWeight.bold),
@@ -163,12 +208,12 @@ class _BooksPageState extends State<BooksPage> {
     );
   }
 
-  Dialog cogDialog(String history, String money, String date) {
+  Dialog cogDialog(String history, String cost, String date, int index) {
     return Dialog(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.38,
         child: Container(
-          margin: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+          margin: const EdgeInsets.fromLTRB(30, 12, 30, 12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -219,7 +264,7 @@ class _BooksPageState extends State<BooksPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "$money  원",
+                            "$cost  원",
                             style: const TextStyle(
                                 fontSize: DIALOG_FONT_SIZE,
                                 fontWeight: FontWeight.bold),
@@ -264,32 +309,27 @@ class _BooksPageState extends State<BooksPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.23,
-                    height: 45,
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    height: 40,
                     child: ElevatedButton(
-                      onPressed: () => {},
-                      child: const Text("수정"),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        bSheets.deleteSheets(index, num);
+                      },
+                      child: const Text("삭제"),
                     ),
                   ),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.23,
-                    height: 45,
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    height: 40,
                     child: ElevatedButton(
-                      onPressed: () => {},
-                      child: const Text("삭제"),
+                      onPressed: () => {Navigator.pop(context)},
+                      child: const Text("확인"),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.25,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () => {Navigator.pop(context)},
-                  child: const Text("확인"),
-                ),
-              ),
             ],
           ),
         ),

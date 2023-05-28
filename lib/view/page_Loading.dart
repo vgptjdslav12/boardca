@@ -5,6 +5,8 @@ import 'package:boardca/view/page_member.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../common/utils/books_sheets.dart';
+
 class LoadingPage extends ConsumerStatefulWidget {
   const LoadingPage({Key? key}) : super(key: key);
 
@@ -18,6 +20,7 @@ class _LoadingPageState extends ConsumerState<LoadingPage> {
     // TODO: implement initState
     super.initState();
     mSheets.initalWorksheet().then((value) {
+      bSheets.initalWorksheet();
       Navigator.popAndPushNamed(context, '/members');
     });
   }

@@ -5,8 +5,6 @@ import 'package:boardca/layout/menu_drawer.dart';
 class InsertMemberPage extends StatefulWidget {
   const InsertMemberPage({Key? key}) : super(key: key);
 
-  static String get routerName => "member_insert";
-
   @override
   _MemberPageState createState() => _MemberPageState();
 }

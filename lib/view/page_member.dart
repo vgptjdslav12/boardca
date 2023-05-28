@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:boardca/common/const/font.dart';
+import 'package:boardca/common/utils/books_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:boardca/layout/default_layout.dart';
 import 'package:boardca/layout/menu_drawer.dart';
@@ -21,10 +22,12 @@ class MemberPage extends ConsumerStatefulWidget {
 class _MemberPageState extends ConsumerState<MemberPage> {
   final String title = '회원 관리';
   var num = 1;
+  var a;
 
   @override
   void initState() {
     super.initState();
+    mSheets.initalWorksheet();
   }
 
   @override
@@ -84,16 +87,34 @@ class _MemberPageState extends ConsumerState<MemberPage> {
                   flex: 1,
                   child: tile(i),
                 )
-              ]
+              ],
+              for (var i = memberList.list.length; i < 10; i++) ...[
+                const Expanded(flex: 1, child: SizedBox()),
+              ],
             ] else ...[
               const CircularProgressIndicator(),
               const Text('로딩중입니다...'),
             ],
-            const Text(
-              "1  2  3  4  >>",
-              style: TextStyle(
-                  fontSize: DEFUALT_FONT_SIZE, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+            Row(
+              children: [
+                for (var i = 1; i < mSheets.amount! / 10 + 1; i++) ...[
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        num = i;
+                        ref.read(memberProvider.notifier).getMember(i, mSheets);
+                      });
+                    },
+                    child: Text(
+                      i.toString(),
+                      style: const TextStyle(
+                          fontSize: DEFUALT_FONT_SIZE,
+                          fontWeight: FontWeight.bold,
+                          color: TEXT_COLOR),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
@@ -104,10 +125,12 @@ class _MemberPageState extends ConsumerState<MemberPage> {
   ListTile tile(MemberInnerModel list) {
     return ListTile(
       onTap: () => {
-        setState(() => showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (BuildContext context) => memberDialog(list)))
+        setState(() {
+          showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (BuildContext context) => memberDialog(list));
+        })
       },
       contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
@@ -153,35 +176,18 @@ class _MemberPageState extends ConsumerState<MemberPage> {
     );
   }
 
-  AppBar appBar() {
-    return AppBar(
-      backgroundColor: PRIMARY_COLOR,
-      foregroundColor: TEXT_COLOR,
-      elevation: 0,
-      shape: const Border(bottom: BorderSide(color: PRIMARY_COLOR, width: 2)),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () => {}, // dialog
-        ),
-      ],
-      title: Text(
-        title,
-        style:
-            const TextStyle(color: BUTTON_COLOR, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
   Dialog memberDialog(MemberInnerModel list) {
     var _ticket = int.parse(list.ticket);
     var _date = list.date;
-    var _temp;
+    var _temp = ref.read(memberProvider) as MemberModel;
+    var _1ticket = 0;
+    var _4ticket = 0;
+    var _1month = 0;
+    var _3month = 0;
     return Dialog(child: StatefulBuilder(
       builder: (context, setState) {
         return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(context).size.height * 0.55,
           child: Container(
             margin: const EdgeInsets.fromLTRB(24, 0, 24, 0),
             child: Column(
@@ -200,14 +206,15 @@ class _MemberPageState extends ConsumerState<MemberPage> {
                           textAlign: TextAlign.left,
                         )),
                     Expanded(
-                        flex: 3,
-                        child: Text(
-                          list.name,
-                          style: const TextStyle(
-                              fontSize: DIALOG_FONT_SIZE,
-                              fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.left,
-                        ))
+                      flex: 3,
+                      child: Text(
+                        list.name,
+                        style: const TextStyle(
+                            fontSize: DIALOG_FONT_SIZE,
+                            fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.left,
+                      ),
+                    )
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -265,8 +272,12 @@ class _MemberPageState extends ConsumerState<MemberPage> {
                             SizedBox(
                               height: 28,
                               child: ElevatedButton(
-                                  onPressed: () =>
-                                      {setState(() => _ticket += -1)},
+                                  onPressed: () => {
+                                        setState(() {
+                                          if (_ticket > 0) _ticket += -1;
+                                          return;
+                                        })
+                                      },
                                   child: const Text("사용",
                                       style: TextStyle(
                                           fontSize: DEFUALT_FONT_SIZE))),
@@ -302,10 +313,6 @@ class _MemberPageState extends ConsumerState<MemberPage> {
                   ],
                 ),
                 const SizedBox(height: 6),
-                const Divider(
-                  color: Colors.black,
-                  thickness: 2,
-                ),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: const [
@@ -320,7 +327,12 @@ class _MemberPageState extends ConsumerState<MemberPage> {
                       width: MediaQuery.of(context).size.width * 0.23,
                       height: 45,
                       child: ElevatedButton(
-                        onPressed: () => {setState(() => _ticket += 1)},
+                        onPressed: () => {
+                          setState(() {
+                            _ticket += 1;
+                            _1ticket += 1;
+                          })
+                        },
                         child: const Text("1 회권"),
                       ),
                     ),
@@ -328,17 +340,18 @@ class _MemberPageState extends ConsumerState<MemberPage> {
                       width: MediaQuery.of(context).size.width * 0.23,
                       height: 45,
                       child: ElevatedButton(
-                        onPressed: () => {setState(() => _ticket += 4)},
+                        onPressed: () => {
+                          setState(() {
+                            _ticket += 4;
+                            _4ticket += 1;
+                          })
+                        },
                         child: const Text("4 회권"),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                const Divider(
-                  color: Colors.black,
-                  thickness: 2,
-                ),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: const [
@@ -353,11 +366,12 @@ class _MemberPageState extends ConsumerState<MemberPage> {
                       width: MediaQuery.of(context).size.width * 0.23,
                       height: 45,
                       child: ElevatedButton(
-                        onPressed: () => {
+                        onPressed: () {
+                          _1month += 1;
                           setState(() => _date = DateTime.parse(_date)
                               .add(const Duration(days: 30))
                               .toString()
-                              .substring(0, 10))
+                              .substring(0, 10));
                         },
                         child: const Text("1 달"),
                       ),
@@ -366,11 +380,12 @@ class _MemberPageState extends ConsumerState<MemberPage> {
                       width: MediaQuery.of(context).size.width * 0.23,
                       height: 45,
                       child: ElevatedButton(
-                        onPressed: () => {
+                        onPressed: () {
+                          _3month += 1;
                           setState(() => _date = DateTime.parse(_date)
                               .add(const Duration(days: 90))
                               .toString()
-                              .substring(0, 10))
+                              .substring(0, 10));
                         },
                         child: const Text("3 달"),
                       ),
@@ -397,11 +412,13 @@ class _MemberPageState extends ConsumerState<MemberPage> {
                               ticket: _ticket.toString(),
                               date: _date,
                               index: list.index),
-                          _temp = ref.read(memberProvider),
-                          _temp.list[list.index - 2] = list,
+                          _temp.list[(list.index - 2) % 10] = list,
                           this.setState(() {
                             setState(() {
-                              ref.read(memberProvider.notifier).update(_temp);
+                              ref.read(memberProvider.notifier).update(
+                                  _temp, mSheets, (list.index) % 10, num);
+                              bSheets.updatedMember(list.name, _1ticket,
+                                  _4ticket, _1month, _3month);
                             });
                           }),
                           Navigator.pop(context)
@@ -425,5 +442,26 @@ class _MemberPageState extends ConsumerState<MemberPage> {
         );
       },
     ));
+  }
+
+  AppBar appBar() {
+    return AppBar(
+      backgroundColor: PRIMARY_COLOR,
+      foregroundColor: TEXT_COLOR,
+      elevation: 0,
+      shape: const Border(bottom: BorderSide(color: PRIMARY_COLOR, width: 2)),
+      centerTitle: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () => {mSheets.serachSheets("박혜성")}, // dialog
+        ),
+      ],
+      title: Text(
+        title,
+        style:
+            const TextStyle(color: BUTTON_COLOR, fontWeight: FontWeight.bold),
+      ),
+    );
   }
 }
